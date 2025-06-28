@@ -1,1 +1,259 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Học Tập</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide-react@latest/dist/lucide-react.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sidebar-link:hover, .sidebar-link.active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+        }
+        .sidebar-link:hover svg, .sidebar-link.active svg {
+            color: white;
+        }
+        .stat-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-teal-700 text-white flex-shrink-0 flex flex-col">
+            <div class="h-20 flex items-center justify-center bg-teal-800">
+                <i data-lucide="book-marked" class="w-8 h-8 mr-2"></i>
+                <h1 class="text-2xl font-bold">Quản Lý</h1>
+            </div>
+            <nav class="flex-grow px-4 py-6">
+                <p class="text-xs font-semibold text-teal-200 uppercase tracking-wider mb-4">Menu Quản Lý</p>
+                <a href="#" class="flex items-center py-3 px-4 rounded-lg sidebar-link active">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i>
+                    <span>Trang chủ</span>
+                </a>
+                <a href="#" class="flex items-center py-3 px-4 rounded-lg sidebar-link mt-2">
+                    <i data-lucide="notebook-pen" class="w-5 h-5 mr-3"></i>
+                    <span>Quản lý bài tập</span>
+                </a>
+                <a href="#" class="flex items-center py-3 px-4 rounded-lg sidebar-link mt-2">
+                    <i data-lucide="users" class="w-5 h-5 mr-3"></i>
+                    <span>Quản lý học sinh</span>
+                </a>
+                <a href="#" class="flex items-center py-3 px-4 rounded-lg sidebar-link mt-2">
+                    <i data-lucide="graduation-cap" class="w-5 h-5 mr-3"></i>
+                    <span>Quản lý điểm</span>
+                </a>
+                <a href="#" class="flex items-center py-3 px-4 rounded-lg sidebar-link mt-2">
+                    <i data-lucide="school" class="w-5 h-5 mr-3"></i>
+                    <span>Quản lý lớp học</span>
+                </a>
+                <a href="#" class="flex items-center py-3 px-4 rounded-lg sidebar-link mt-2">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5 mr-3"></i>
+                    <span>Báo cáo</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t border-teal-600">
+                 <div class="flex items-center">
+                    <img src="https://placehold.co/40x40/a7f3d0/134e4a?text=P" alt="Avatar" class="w-10 h-10 rounded-full">
+                    <div class="ml-3">
+                        <p class="font-semibold">Nguyễn Hữu Phúc</p>
+                        <p class="text-sm text-teal-200">Giáo viên</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8">
+                <div>
+                    <!-- Hamburger menu for mobile -->
+                    <button class="md:hidden text-gray-500">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="flex items-center">
+                    <button class="text-gray-500 hover:text-gray-700 mr-6">
+                        <i data-lucide="bell" class="w-6 h-6"></i>
+                    </button>
+                    <a href="#" class="flex items-center text-red-500 hover:text-red-700 font-semibold">
+                        <i data-lucide="log-out" class="w-5 h-5 mr-2"></i>
+                        <span>Đăng xuất</span>
+                    </a>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-8">
+                <div class="container mx-auto">
+                    <!-- Welcome Banner -->
+                    <div class="bg-gradient-to-r from-teal-500 to-cyan-500 text-white p-8 rounded-xl shadow-lg mb-8">
+                        <h2 class="text-3xl font-bold">Chào mừng, Giáo viên!</h2>
+                        <p class="mt-2 text-teal-100">Hôm nay là một ngày tuyệt vời để giảng dạy và hướng dẫn học sinh.</p>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <!-- Card 1: Tổng học sinh -->
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center stat-card">
+                            <div class="p-4 bg-blue-100 rounded-full">
+                                <i data-lucide="users-2" class="w-8 h-8 text-blue-500"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-500 text-sm">Tổng học sinh</p>
+                                <p class="text-3xl font-bold">145</p>
+                            </div>
+                        </div>
+                        <!-- Card 2: Bài tập đã giao -->
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center stat-card">
+                            <div class="p-4 bg-green-100 rounded-full">
+                                <i data-lucide="file-check-2" class="w-8 h-8 text-green-500"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-500 text-sm">Bài tập đã giao</p>
+                                <p class="text-3xl font-bold">23</p>
+                            </div>
+                        </div>
+                        <!-- Card 3: Chờ chấm điểm -->
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center stat-card">
+                             <div class="p-4 bg-yellow-100 rounded-full">
+                                <i data-lucide="hourglass" class="w-8 h-8 text-yellow-500"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-500 text-sm">Chờ chấm điểm</p>
+                                <p class="text-3xl font-bold">12</p>
+                            </div>
+                        </div>
+                        <!-- Card 4: Lớp học -->
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center stat-card">
+                             <div class="p-4 bg-purple-100 rounded-full">
+                                <i data-lucide="award" class="w-8 h-8 text-purple-500"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-500 text-sm">Lớp học</p>
+                                <p class="text-3xl font-bold">5</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart and Recent Activity -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="font-semibold text-lg mb-4">Thống kê điểm trung bình</h3>
+                            <canvas id="gradeChart"></canvas>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="font-semibold text-lg mb-4">Hoạt động gần đây</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start">
+                                    <div class="bg-green-100 p-2 rounded-full mr-4 mt-1">
+                                        <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Bạn đã chấm bài tập "Vật Lý Chương 3".</p>
+                                        <p class="text-sm text-gray-500">15 phút trước</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="bg-blue-100 p-2 rounded-full mr-4 mt-1">
+                                        <i data-lucide="user-plus" class="w-4 h-4 text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Học sinh mới "Trần Văn An" đã tham gia lớp 10A2.</p>
+                                        <p class="text-sm text-gray-500">1 giờ trước</p>
+                                    </div>
+                                </li>
+                                 <li class="flex items-start">
+                                    <div class="bg-yellow-100 p-2 rounded-full mr-4 mt-1">
+                                        <i data-lucide="file-pen-line" class="w-4 h-4 text-yellow-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Bạn đã giao bài tập mới "Lịch Sử Cổ Đại".</p>
+                                        <p class="text-sm text-gray-500">3 giờ trước</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Chart.js implementation
+        const ctx = document.getElementById('gradeChart').getContext('2d');
+        const gradeChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
+                datasets: [{
+                    label: 'Điểm TB Lớp 10A1',
+                    data: [8.5, 8.2, 8.8, 8.6, 9.0, 9.2],
+                    backgroundColor: 'rgba(13, 148, 136, 0.2)', // teal-600
+                    borderColor: 'rgba(13, 148, 136, 1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                }, {
+                    label: 'Điểm TB Lớp 11B2',
+                    data: [7.8, 8.1, 8.0, 8.4, 8.3, 8.5],
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)', // blue-500
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        suggestedMin: 6,
+                        suggestedMax: 10
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
 
