@@ -1,52 +1,68 @@
 import streamlit as st
-import random
 
-# --- Cấu hình trang ---
-st.set_page_config(page_title="AI Chatbot", layout="centered")
-st.title("🤖 Trợ lý học tập AI")
-
-# --- Giới thiệu ngắn ---
-with st.expander("📘 Hướng dẫn sử dụng", expanded=False):
-    st.markdown("""
-    - Nhập câu hỏi vào khung bên dưới.
-    - AI sẽ trả lời như một trợ lý học tập.
-    - Dữ liệu sẽ được giữ trong phiên hiện tại.
-    """)
-
-# --- Khởi tạo session state để lưu hội thoại ---
+# ---------- Khởi tạo session ----------
+if "role" not in st.session_state:
+    st.session_state.role = None
+if "api_key" not in st.session_state:
+    st.session_state.api_key = ""
+if "model" not in st.session_state:
+    st.session_state.model = "gpt-3.5-turbo"
 if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "assistant", "content": "Xin chào! Tôi có thể giúp gì cho bạn hôm nay?"}
-    ]
+    st.session_state.messages = []
 
-# --- Hiển thị lịch sử hội thoại ---
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+# ---------- Chọn vai trò ----------
+st.title("🎓 Nền tảng học tập sử dụng AI")
 
-# --- Người dùng nhập câu hỏi ---
-prompt = st.chat_input("Nhập câu hỏi của bạn...")
+role = st.sidebar.selectbox("🔐 Chọn vai trò", ["Học sinh", "Giáo viên", "Admin"])
 
-# --- Hàm phản hồi AI đơn giản (giả lập) ---
-def generate_ai_reply(user_input):
-    fake_replies = [
-        "Câu hỏi rất hay! Để tôi suy nghĩ chút nhé...",
-        "Tôi nghĩ bạn nên bắt đầu từ chương 2.",
-        "Hãy thử giải bài tập tương tự trong SGK.",
-        "Tôi khuyên bạn tra cứu thêm tại VietJack hoặc Hocmai.",
-        "Có thể bạn cần luyện thêm phần này. Tôi có thể giúp bạn nếu muốn!"
-    ]
-    return random.choice(fake_replies)
+# ---------- Vai trò ADMIN ----------
+if role == "Admin":
+    st.header("👑 Cài đặt AI từ Admin")
+    st.session_state.role = "admin"
 
-# --- Xử lý khi người dùng gửi tin nhắn ---
-if prompt:
-    # Lưu tin nhắn người dùng
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    api = st.text_input("🔑 Nhập API Key", value=st.session_state.api_key, type="password")
+    model = st.selectbox("🧠 Chọn mô hình", ["gpt-3.5-turbo", "gpt-4", "Claude", "Gemini"])
+    curl_example = f"""curl https://api.openai.com/v1/chat/completions \\
+  -H "Authorization: Bearer {api}" \\
+  -H "Content-Type: application/json" \\
+  -d '{{"model": "{model}", "messages": [{{"role":"user","content":"Xin chào"}}]}}'
+"""
 
-    # Tạo phản hồi từ AI (tạm thời dùng mẫu giả lập)
-    ai_reply = generate_ai_reply(prompt)
-    st.session_state.messages.append({"role": "assistant", "content": ai_reply})
-    with st.chat_message("assistant"):
-        st.markdown(ai_reply)
+    if st.button("💾 Lưu cài đặt"):
+        st.session_state.api_key = api
+        st.session_state.model = model
+        st.success("✅ Đã lưu API key và model.")
+
+    st.subheader("📋 CURL mẫu:")
+    st.code(curl_example, language="bash")
+
+# ---------- Vai trò HỌC SINH ----------
+elif role == "Học sinh":
+    st.header("🤖 Hỏi đáp cùng AI")
+    st.session_state.role = "student"
+
+    if not st.session_state.api_key:
+        st.warning("Admin chưa cài đặt API key.")
+    else:
+        for msg in st.session_state.messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+
+        user_input = st.chat_input("Nhập câu hỏi của bạn...")
+        if user_input:
+            # Lưu tin nhắn
+            st.session_state.messages.append({"role": "user", "content": user_input})
+            with st.chat_message("user"):
+                st.markdown(user_input)
+
+            # Gọi API thật ở đây (tạm phản hồi giả)
+            with st.chat_message("assistant"):
+                fake_reply = f"[Mô hình: {st.session_state.model}] Trả lời: Tôi đang xử lý câu hỏi của bạn..."
+                st.markdown(fake_reply)
+                st.session_state.messages.append({"role": "assistant", "content": fake_reply})
+
+# ---------- Vai trò GIÁO VIÊN ----------
+elif role == "Giáo viên":
+    st.header("📚 Quản lý nội dung (Giáo viên)")
+    st.session_state.role = "teacher"
+    st.info("Chức năng cho giáo viên sẽ được cập nhật sau.")
